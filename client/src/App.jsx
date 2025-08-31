@@ -6,15 +6,21 @@ const socket = io.connect(import.meta.env.VITE_SERVER_URL);
 
 const App = () => {
   const [sndMessage, setSndMessage] = useState("");
+  const [receivedMessage, setReceivedMessage] = useState([]);
   const sendMessage = () => {
     socket.emit("send_message", {message: sndMessage});
   }
 
   useEffect(() => {
-    socket.on("receive_message", (data) => {
-      alert(data.message);
-    })
-  }, [socket])
+ const handleMessage = (data) => {
+    setReceivedMessage((prevMessages) => [...prevMessages, data.message]);
+  };
+
+  socket.on("receive_message", handleMessage);
+    return () => {
+    socket.off("receive_message", handleMessage);
+  };
+  }, [])
 
   return (
     <div>
@@ -24,6 +30,13 @@ const App = () => {
       <button onClick={sendMessage}>Send</button>
       <div>
         <h1>Received Message</h1>
+        <ul>
+        {
+          receivedMessage.map((message, index) => (
+              <li key={index}>{message}</li>
+            ))
+          }
+          </ul> 
       </div>
     </div>
   )
