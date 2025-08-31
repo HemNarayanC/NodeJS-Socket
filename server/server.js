@@ -15,6 +15,14 @@ const io = new Server(server, {
     }
 });
 
+io.on("connection", (socket) => {
+    console.log(`User Connected: ${socket.id}`);
+    socket.on("send_message", (data) => {
+        console.log(`New Message: ${data.message}`);
+        socket.broadcast.emit("receive_message", data);
+    })
+});
+
 const PORT = process.env.PORT;
 server.listen(PORT, () => {
     console.log(`Server running at port ${PORT}`);
